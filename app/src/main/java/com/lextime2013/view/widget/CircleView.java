@@ -24,7 +24,9 @@ public class CircleView extends View {
 
     private Paint mPaint;
     private Paint mTextPaint;
-    private Paint mLinePaint;
+    private Paint mHourPaint;
+    private Paint mMinutePaint;
+    private Paint mSecondPaint;
     private float mRadius;
     private Context mContext;
     private Rect mRect = new Rect();
@@ -34,8 +36,18 @@ public class CircleView extends View {
     private float mStartY;
     private boolean mIsFirst = true;
 
+    // 时间
+    private float mSecondX;
+    private float mSecondY;
+    private float mMinuteX;
+    private float mMinuteY;
+    private float mHourX;
+    private float mHourY;
+
     private String mTime;
     private boolean mIsDrag = false;
+
+    private int[] timeArr = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
     public CircleView(Context context) {
         this(context, null);
@@ -58,17 +70,32 @@ public class CircleView extends View {
         mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         mTextPaint = new Paint();
-        mTextPaint.setColor(mContext.getResources().getColor(R.color.white));
+        mTextPaint.setColor(mContext.getResources().getColor(R.color.black));
         mTextPaint.setAntiAlias(true);
         mTextPaint.setDither(true);
         mTextPaint.setTextSize(80);
         mTextPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
-        mLinePaint = new Paint();
-        mLinePaint.setColor(mContext.getResources().getColor(R.color.black));
-        mLinePaint.setAntiAlias(true);
-        mLinePaint.setDither(true);
-        mLinePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mHourPaint = new Paint();
+        mHourPaint.setColor(mContext.getResources().getColor(R.color.grey));
+        mHourPaint.setAntiAlias(true);
+        mHourPaint.setDither(true);
+        mHourPaint.setStrokeWidth(12);
+        mHourPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        mMinutePaint = new Paint();
+        mMinutePaint.setColor(mContext.getResources().getColor(R.color.grey));
+        mMinutePaint.setAntiAlias(true);
+        mMinutePaint.setDither(true);
+        mMinutePaint.setStrokeWidth(10);
+        mMinutePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        mSecondPaint = new Paint();
+        mSecondPaint.setColor(mContext.getResources().getColor(R.color.red));
+        mSecondPaint.setAntiAlias(true);
+        mSecondPaint.setDither(true);
+        mSecondPaint.setStrokeWidth(3);
+        mSecondPaint.setStyle(Paint.Style.FILL_AND_STROKE);
     }
 
     @Override
@@ -94,18 +121,49 @@ public class CircleView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mRadius = w / 2;
+        mRadius = w / 2F;
+        mSecondX = mMinuteX = mHourX = mRadius;
+        mSecondY = mMinuteY = mHourY = 0;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         // 圆
+        mPaint.setColor(mContext.getResources().getColor(R.color.black));
         canvas.drawCircle(mRadius, mRadius, mRadius, mPaint);
+        mPaint.setColor(mContext.getResources().getColor(R.color.white));
+        canvas.drawCircle(mRadius, mRadius, mRadius * 14F / 15F, mPaint);
+        drawNumber(canvas);
+        // 时分秒针
+        canvas.drawLine(mRadius, mRadius, mSecondX, mSecondY, mSecondPaint);
+        canvas.drawLine(mRadius, mRadius, mMinuteX, mMinuteY, mMinutePaint);
+        canvas.drawLine(mRadius, mRadius, mHourX, mHourY, mHourPaint);
+        // 中点
+        canvas.drawCircle(mRadius, mRadius, 20, mMinutePaint);
         // 时间
         drawTime(canvas);
-        // 中点
-        canvas.drawCircle(mRadius, mRadius, 20, mLinePaint);
+    }
+
+    /**
+     * 画数字
+     * @param canvas 画布
+     */
+    private void drawNumber(Canvas canvas){
+        for(int i = 0; i < timeArr.length; i++) {
+            int hour = timeArr[i];
+
+            float hourPercent = hour / 12F;
+            float hourAlpha = (float) (hourPercent * Math.PI * 2);
+            float x = (float) (mRadius + mRadius * Math.sin(hourAlpha) * 5F / 6F);
+            float y = (float) (mRadius - mRadius * Math.cos(hourAlpha) * 5F / 6F);
+
+            String number = String.valueOf(hour);
+            Rect rect = new Rect();
+            mTextPaint.getTextBounds(number, 0, number.length(), rect);
+
+            canvas.drawText(String.valueOf(hour), x - rect.width() / 2F, y + rect.height() / 2F, mTextPaint);
+        }
     }
 
     /**
@@ -116,8 +174,8 @@ public class CircleView extends View {
             if(mIsFirst) {
                 mIsFirst = false;
                 mTextPaint.getTextBounds(mTime, 0, mTime.length(), mRect);
-                mTextX = mRadius - mRect.width() / 2;
-                mTextY = mRadius + mRect.height() / 2;
+                mTextX = mRadius - mRect.width() / 2F;
+                mTextY = mRadius + 5F *mRect.height() / 2F;
             }
             canvas.drawText(mTime, mTextX, mTextY, mTextPaint);
         }
@@ -135,9 +193,21 @@ public class CircleView extends View {
         int minute = calendar.getTime().getMinutes();
         int second = calendar.getTime().getSeconds();
 
-        float hourPercent = hour / 12;
-        float minutePercent = minute / 60;
-        float secondPercent = second / 60;
+        float hourPercent = hour / 12F;
+        float minutePercent = minute / 60F;
+        float secondPercent = second / 60F;
+
+        float hourAlpha = (float) (hourPercent * Math.PI * 2);
+        mHourX = (float) (mRadius + mRadius * Math.sin(hourAlpha) * 3F / 5F);
+        mHourY = (float) (mRadius - mRadius * Math.cos(hourAlpha) * 3F / 5F);
+
+        float minuteAlpha = (float) (minutePercent * Math.PI * 2);
+        mMinuteX = (float) (mRadius + mRadius * Math.sin(minuteAlpha) * 4F / 5F);
+        mMinuteY = (float) (mRadius - mRadius * Math.cos(minuteAlpha) * 4F / 5F);
+
+        float secondAlpha = (float) (secondPercent * Math.PI * 2);
+        mSecondX = (float) (mRadius + mRadius * Math.sin(secondAlpha));
+        mSecondY = (float) (mRadius - mRadius * Math.cos(secondAlpha));
 
         invalidate();
     }
