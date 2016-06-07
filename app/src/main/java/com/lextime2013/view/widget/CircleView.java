@@ -1,6 +1,7 @@
 package com.lextime2013.view.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -54,7 +55,24 @@ public class CircleView extends View {
     }
 
     public CircleView(Context context, AttributeSet attr) {
-        super(context, attr);
+        this(context, attr, 0);
+    }
+
+    public CircleView(Context context, AttributeSet attributeSet, int defStyleAttr) {
+        super(context, attributeSet, defStyleAttr);
+
+        TypedArray typedArray = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.CircleView, defStyleAttr, 0);
+        if(typedArray != null && typedArray.getIndexCount() > 0) {
+            for(int i = 0; i < typedArray.getIndexCount(); i++) {
+                switch (typedArray.getIndex(i)) {
+                    case R.styleable.CircleView_radius:
+                        mRadius = typedArray.getDimension(i, 400F);
+                        break;
+                }
+            }
+            typedArray.recycle();
+        }
+
         mContext = context;
         initPaint();
     }
@@ -121,7 +139,9 @@ public class CircleView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mRadius = w / 2F;
+        if(mRadius <= 0) {
+            mRadius = w / 2F;
+        }
         mSecondX = mMinuteX = mHourX = mRadius;
         mSecondY = mMinuteY = mHourY = 0;
     }
@@ -129,6 +149,8 @@ public class CircleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        postInvalidateDelayed(1000);
+        calculateTime();
         // 圆
         mPaint.setColor(mContext.getResources().getColor(R.color.black));
         canvas.drawCircle(mRadius, mRadius, mRadius, mPaint);
@@ -208,8 +230,6 @@ public class CircleView extends View {
         float secondAlpha = (float) (secondPercent * Math.PI * 2);
         mSecondX = (float) (mRadius + mRadius * Math.sin(secondAlpha));
         mSecondY = (float) (mRadius - mRadius * Math.cos(secondAlpha));
-
-        invalidate();
     }
 
     @Override
