@@ -31,19 +31,30 @@ public class CircleView extends View {
     private float mRadius;
     private Context mContext;
     private Rect mRect = new Rect();
+    /**
+     * 文本左下角位置
+     */
     private float mTextX;
     private float mTextY;
-    private float mStartX;
-    private float mStartY;
+    /**
+     * 第一次需要确定事件数字的位置
+     */
     private boolean mIsFirst = true;
+    /**
+     * 记录点击的坐标
+     */
+    private float mClickX;
+    private float mClickY;
 
-    // 时间
-    private float mSecondX;
-    private float mSecondY;
-    private float mMinuteX;
-    private float mMinuteY;
-    private float mHourX;
-    private float mHourY;
+    /**
+     * 时分秒的终点
+     */
+    private float mSecondLineX;
+    private float mSecondLineY;
+    private float mMinuteLineX;
+    private float mMinuteLineY;
+    private float mHourLineX;
+    private float mHourLineY;
 
     private String mTime;
     private boolean mIsDrag = false;
@@ -142,8 +153,8 @@ public class CircleView extends View {
         if(mRadius <= 0) {
             mRadius = w / 2F;
         }
-        mSecondX = mMinuteX = mHourX = mRadius;
-        mSecondY = mMinuteY = mHourY = 0;
+        mSecondLineX = mMinuteLineX = mHourLineX = mRadius;
+        mSecondLineY = mMinuteLineY = mHourLineY = 0;
     }
 
     @Override
@@ -158,9 +169,9 @@ public class CircleView extends View {
         canvas.drawCircle(mRadius, mRadius, mRadius * 14F / 15F, mPaint);
         drawNumber(canvas);
         // 时分秒针
-        canvas.drawLine(mRadius, mRadius, mSecondX, mSecondY, mSecondPaint);
-        canvas.drawLine(mRadius, mRadius, mMinuteX, mMinuteY, mMinutePaint);
-        canvas.drawLine(mRadius, mRadius, mHourX, mHourY, mHourPaint);
+        canvas.drawLine(mRadius, mRadius, mSecondLineX, mSecondLineY, mSecondPaint);
+        canvas.drawLine(mRadius, mRadius, mMinuteLineX, mMinuteLineY, mMinutePaint);
+        canvas.drawLine(mRadius, mRadius, mHourLineX, mHourLineY, mHourPaint);
         // 中点
         canvas.drawCircle(mRadius, mRadius, 20, mMinutePaint);
         // 时间
@@ -220,35 +231,35 @@ public class CircleView extends View {
         float secondPercent = second / 60F;
 
         float hourAlpha = (float) (hourPercent * Math.PI * 2);
-        mHourX = (float) (mRadius + mRadius * Math.sin(hourAlpha) * 3F / 5F);
-        mHourY = (float) (mRadius - mRadius * Math.cos(hourAlpha) * 3F / 5F);
+        mHourLineX = (float) (mRadius + mRadius * Math.sin(hourAlpha) * 3F / 5F);
+        mHourLineY = (float) (mRadius - mRadius * Math.cos(hourAlpha) * 3F / 5F);
 
         float minuteAlpha = (float) (minutePercent * Math.PI * 2);
-        mMinuteX = (float) (mRadius + mRadius * Math.sin(minuteAlpha) * 4F / 5F);
-        mMinuteY = (float) (mRadius - mRadius * Math.cos(minuteAlpha) * 4F / 5F);
+        mMinuteLineX = (float) (mRadius + mRadius * Math.sin(minuteAlpha) * 4F / 5F);
+        mMinuteLineY = (float) (mRadius - mRadius * Math.cos(minuteAlpha) * 4F / 5F);
 
         float secondAlpha = (float) (secondPercent * Math.PI * 2);
-        mSecondX = (float) (mRadius + mRadius * Math.sin(secondAlpha));
-        mSecondY = (float) (mRadius - mRadius * Math.cos(secondAlpha));
+        mSecondLineX = (float) (mRadius + mRadius * Math.sin(secondAlpha));
+        mSecondLineY = (float) (mRadius - mRadius * Math.cos(secondAlpha));
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mStartX = event.getX();
-                mStartY = event.getY();
-                if(mRect.contains((int) (mStartX - mTextX), (int) (mStartY - mTextY))) {
+                mClickX = event.getX();
+                mClickY = event.getY();
+                if(mRect.contains((int) (mClickX - mTextX), (int) (mClickY - mTextY))) {
                     mIsDrag = true;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if(mIsDrag) {
-                    float x = event.getX() - mStartX;
-                    float y = event.getY() - mStartY;
+                    float x = event.getX() - mClickX;
+                    float y = event.getY() - mClickY;
 
-                    mStartX = event.getX();
-                    mStartY = event.getY();
+                    mClickX = event.getX();
+                    mClickY = event.getY();
 
                     float tempX1 = mTextX + x;
                     float tempX2 = tempX1 + mRect.width();
