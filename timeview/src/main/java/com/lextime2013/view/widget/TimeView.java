@@ -20,8 +20,8 @@ import java.util.Calendar;
  * 圆形图
  * Created by lex on 16/6/5.
  */
-public class CircleView extends View {
-    private final String TAG = CircleView.class.getSimpleName();
+public class TimeView extends View {
+    private final String TAG = TimeView.class.getSimpleName();
 
     private Paint mPaint;
     private Paint mTextPaint;
@@ -61,22 +61,22 @@ public class CircleView extends View {
 
     private int[] timeArr = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
-    public CircleView(Context context) {
+    public TimeView(Context context) {
         this(context, null);
     }
 
-    public CircleView(Context context, AttributeSet attr) {
+    public TimeView(Context context, AttributeSet attr) {
         this(context, attr, 0);
     }
 
-    public CircleView(Context context, AttributeSet attributeSet, int defStyleAttr) {
+    public TimeView(Context context, AttributeSet attributeSet, int defStyleAttr) {
         super(context, attributeSet, defStyleAttr);
 
-        TypedArray typedArray = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.CircleView, defStyleAttr, 0);
+        TypedArray typedArray = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.TimeView, defStyleAttr, 0);
         if(typedArray != null && typedArray.getIndexCount() > 0) {
             for(int i = 0; i < typedArray.getIndexCount(); i++) {
                 switch (typedArray.getIndex(i)) {
-                    case R.styleable.CircleView_radius:
+                    case R.styleable.TimeView_radius:
                         mRadius = typedArray.getDimension(i, 400F);
                         break;
                 }
@@ -111,6 +111,8 @@ public class CircleView extends View {
         mHourPaint.setDither(true);
         mHourPaint.setStrokeWidth(12);
         mHourPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mHourPaint.setStrokeCap(Paint.Cap.ROUND);
+        mHourPaint.setStrokeJoin(Paint.Join.ROUND);
 
         mMinutePaint = new Paint();
         mMinutePaint.setColor(mContext.getResources().getColor(R.color.grey));
@@ -118,6 +120,8 @@ public class CircleView extends View {
         mMinutePaint.setDither(true);
         mMinutePaint.setStrokeWidth(10);
         mMinutePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mMinutePaint.setStrokeCap(Paint.Cap.ROUND);
+        mMinutePaint.setStrokeJoin(Paint.Join.ROUND);
 
         mSecondPaint = new Paint();
         mSecondPaint.setColor(mContext.getResources().getColor(R.color.red));
@@ -125,6 +129,13 @@ public class CircleView extends View {
         mSecondPaint.setDither(true);
         mSecondPaint.setStrokeWidth(3);
         mSecondPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mSecondPaint.setStrokeCap(Paint.Cap.ROUND);
+        mSecondPaint.setStrokeJoin(Paint.Join.ROUND);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
     }
 
     @Override
@@ -239,8 +250,8 @@ public class CircleView extends View {
         mMinuteLineY = (float) (mRadius - mRadius * Math.cos(minuteAlpha) * 4F / 5F);
 
         float secondAlpha = (float) (secondPercent * Math.PI * 2);
-        mSecondLineX = (float) (mRadius + mRadius * Math.sin(secondAlpha));
-        mSecondLineY = (float) (mRadius - mRadius * Math.cos(secondAlpha));
+        mSecondLineX = (float) (mRadius + mRadius * Math.sin(secondAlpha) * 9F / 10F);
+        mSecondLineY = (float) (mRadius - mRadius * Math.cos(secondAlpha) * 9F / 10F);
     }
 
     @Override

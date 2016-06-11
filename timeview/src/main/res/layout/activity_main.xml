@@ -19,7 +19,7 @@
         android:layout_gravity="center"
         android:visibility="gone"/>
 
-    <com.lextime2013.view.widget.CircleView
+    <com.lextime2013.view.widget.TimeView
         android:id="@+id/circle_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
